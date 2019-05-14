@@ -95,6 +95,14 @@
 - name: ardana-upgrade-tools | pkg-update  | Set _pre_update_pkgs fact
   set_fact:
     _pre_update_pkgs: "{{ installed_pkgs | default([]) }}"
+    
+  # PTF packages are not updated using the patch zypper command. So, it's 
+  # necessary installed them with a zypper update first
+- name: ardana-upgrade-tools | pkg-update | Update the package from PTF repo
+  become: yes
+  command: zypper --non-interactive update -r PTF --download in-advance
+  ignore_errors: yes
+  when: zypper_update_method == "patch"
 
 # Sometimes zypper needs to go through several iterations when installing
 # patches, e.g. when those patches include updates to the zypper packages
